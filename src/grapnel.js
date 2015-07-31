@@ -321,7 +321,7 @@
     }
 
     if('function' === typeof root.define && !root.define.amd.grapnel){
-        root.define(function(require, exports, module){
+        root.define('grapnel', [], function(require, exports, module){
             root.define.amd.grapnel = true;
             return Grapnel;
         });
