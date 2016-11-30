@@ -21,6 +21,9 @@
         this.options.env = this.options.env || (!!(Object.keys(root).length === 0 && process && process.browser !== true) ? 'server' : 'client');
         this.options.mode = this.options.mode || (!!(this.options.env !== 'server' && this.options.pushState && root.history && root.history.pushState) ? 'pushState' : 'hashchange');
         this.version = '0.6.4'; // Version
+        if (this.options.invokeWhenDefined===undefined) {
+            this.options.invokeWhenDefined = true;
+        }
 
         if ('function' === typeof root.addEventListener) {
             root.addEventListener('hashchange', function() {
@@ -131,7 +134,12 @@
         // Event name
         var eventName = (self.options.mode !== 'pushState' && self.options.env !== 'server') ? 'hashchange' : 'navigate';
         // Invoke when route is defined, and once again when app navigates
-        return invoke().on(eventName, invoke);
+
+        if (self.options.invokeWhenDefined) {
+            invoke();
+        }
+
+        return self.on(eventName, invoke);
     };
     /**
      * Fire an event listener
@@ -309,7 +317,7 @@
      * Build request parameters and allow them to be checked against a string (usually the current path)
      *
      * @param {String} Route
-     * @return {self} Request 
+     * @return {self} Request
      */
     function Request(route) {
         this.route = route;
@@ -321,7 +329,7 @@
     /**
      * Prevent a callback from being called
      *
-     * @return {self} CallStack 
+     * @return {self} CallStack
      */
     CallStack.prototype.preventDefault = function() {
         this.runCallback = false;
@@ -329,7 +337,7 @@
     /**
      * Prevent any future callbacks from being called
      *
-     * @return {self} CallStack 
+     * @return {self} CallStack
      */
     CallStack.prototype.stopPropagation = function() {
         this.propagateEvent = false;
@@ -337,7 +345,7 @@
     /**
      * Get parent state
      *
-     * @return {Object} Previous state 
+     * @return {Object} Previous state
      */
     CallStack.prototype.parent = function() {
         var hasParentEvents = !!(this.previousState && this.previousState.value && this.previousState.value == this.value);
@@ -346,7 +354,7 @@
     /**
      * Run a callback (calls to next)
      *
-     * @return {self} CallStack 
+     * @return {self} CallStack
      */
     CallStack.prototype.callback = function() {
         this.callbackRan = true;
@@ -358,7 +366,7 @@
      *
      * @param {Function|Array} Handler or a array of handlers
      * @param {Int} Index to start inserting
-     * @return {self} CallStack 
+     * @return {self} CallStack
      */
     CallStack.prototype.enqueue = function(handler, atIndex) {
         var handlers = (!Array.isArray(handler)) ? [handler] : ((atIndex < handler.length) ? handler.reverse() : handler);
@@ -372,7 +380,7 @@
     /**
      * Call to next item in stack -- this adds the `req`, `event`, and `next()` arguments to all middleware
      *
-     * @return {self} CallStack 
+     * @return {self} CallStack
      */
     CallStack.prototype.next = function() {
         var self = this;
